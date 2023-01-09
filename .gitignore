@@ -1,0 +1,7 @@
+/node_modules
+*.csv
+*.json
+TODO
+index.html
+.DS_Store
+sigemd.py
