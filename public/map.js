@@ -12,11 +12,6 @@ var seoul = [];
 $.getJSON("seoul_dict.json", function(seouljson) {
   console.log("getJSON :: seoul_dict ok");
   seoul = seouljson;
-  for (var gu in seoul){
-    if (seoul[gu].includes('신사동')){
-      console.log(seoul[gu]);
-    }
-  }
 });
 
 function DrawSeoulMap(){
@@ -28,7 +23,6 @@ function DrawSeoulMap(){
     var name = ''; //행정 구 이름
     var districts = []; // 구 저장하는 배열
 
-    console.log("here?");
     $.each(data, function(index, val) {
 
       coordinates = val.geometry.coordinates;
@@ -44,6 +38,7 @@ var polygons_gu = [];
 var polygons_dong = [];
 var polygons_select = [];
 var overlays = [];
+
 
 // 행정구역 폴리곤 그리는 함수
 function displayArea(coordinates, name){
@@ -124,8 +119,6 @@ function displayArea(coordinates, name){
     deletePolygon(polygons_gu); //폴리곤 제거
     deleteDistrict(overlays);
 
-    console.log(name, "c l i c k e d")
-
     // 클릭한 다각형만 다시 그리는 함수 호출
     redrawPolygon(path, name); // mouseover에 있던 name (ㅇㅇ구)
   });
@@ -155,12 +148,9 @@ function centroid(points) {
 function deletePolygon(polygons) {
   tmp = 0;
   for (var i = 0; i < polygons.length; i++) {
-    // polygons[i].setOptions({
-    //   fillOpacity: 0
-    // });
     polygons[i].setMap(null);
   }
-  console.log("지 도 폴 리 곤 제 거 !")
+  console.log("지 도 폴 리 곤 제 거  ? ")
   polygons = [];
 }
 
@@ -174,24 +164,9 @@ function deleteDistrict(overlays) {
 }
 
 
-// 클릭한 다각형을 다시 그리는 함수
-function redrawPolygon(path, gu) {
-  var polygon = new kakao.maps.Polygon({
-    map: map, // 다각형을 표시할 지도 객체
-    path: path,
-    strokeWeight: 3,
-    strokeColor: '#8a4e91', // blue: 004c80; green: 00785c, purple: 8a4e91
-    strokeOpacity: 0.8,
-    fillColor: '#fff',
-    fillOpacity: 0.7
-  });
-  polygons_select.push(polygon);
-
-
-  console.log("Redraw:" + gu);
-
-  // 여기에 동 다각형 그리는 코드!!
-  // TODO: 특정 구를 클릭하면 그 구 안에 있는 동들만 표시되도록 하기.
+// clicked_gu에 속한 동 다각형 그리는 코드
+function drawDong(clicked_gu){
+  console.log("drawDong start");
   $.getJSON("seoul_dong_10percent.json", function(geojson)
   {
     console.log("getJSON (dong) ok");
@@ -210,28 +185,38 @@ function redrawPolygon(path, gu) {
       polygon_type = val.geometry.type;
       dongs.push(d_name);
 
-      console.log(d_name, "==@");
-      if (seoul[gu].includes(d_name)){
-        console.log("h e r e ", gu, d_name);
-      }
-
-
       // TODO: 23.01.09 강남구 신사동, 은평구 신사동 구분 방법 찾기
-      // if d_name in gu && gu == : display
-      // else continue
-
-      // for (var key in seoul){
-      //   console.log(key);
-      // }
-
-      // console.log(d_name);
-      if (polygon_type == 'MultiPolygon') {
-        displayMultipolygonDong(d_coordinates, d_name);
-      } else {
-        displayDong(d_coordinates, d_name);
+      if (seoul[clicked_gu].includes(d_name)){
+        if (polygon_type == 'MultiPolygon') {
+          displayMultipolygonDong(d_coordinates, d_name);
+        } else {
+          displayDong(d_coordinates, d_name);
+        }
       }
     });
   });
+}
+
+
+// 클릭한 다각형을 다시 그리는 함수
+function redrawPolygon(path, gu) {
+  var polygon = new kakao.maps.Polygon({
+    map: map, // 다각형을 표시할 지도 객체
+    path: path,
+    strokeWeight: 3,
+    strokeColor: '#8a4e91', // blue: 004c80; green: 00785c, purple: 8a4e91
+    strokeOpacity: 0.8,
+    fillColor: '#fff',
+    fillOpacity: 0.7
+  });
+  polygons_select.push(polygon);
+
+
+  console.log("c l i c k : " + gu);
+
+  // 여기에 동 다각형 그리는 코드!!
+  // TODO: 특정 구를 클릭하면 그 구 안에 있는 동들만 표시되도록 하기. => 23.01.10 완료.
+  drawDong(gu);
 }
 
 
