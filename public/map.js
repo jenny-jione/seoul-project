@@ -107,6 +107,8 @@ function displayArea(coordinates, name){
   // 다각형에 click 이벤트를 등록하고 이벤트가 발생하면 해당 지역 확대 & '구' 다각형은 모두 지우기
   kakao.maps.event.addListener(polygon, 'click', function() {
     // 현재 지도 레벨에서 2레벨 확대한 레벨
+    // var level = map.getLevel() - 2;
+    // TODO:23.01.11: 클릭한 구 크기에 맞게 확대하기 
     var level = map.getLevel() - 2;
 
     // 지도를 클릭된 폴리곤의 중앙 위치를 기준으로 확대합니다
@@ -263,14 +265,22 @@ function displayDong(coordinates, name) {
     });
     // console.log(++mcnt);
     document.getElementById("dong").innerHTML = name;
+    customOverlay.setContent('<div class="area">' + name + '</div>');
+    customOverlay.setPosition(mouseEvent.latLng);
+    customOverlay.setMap(map);
   });
+
+
+  // 다각형에 mousemove 이벤트를 등록하고 이벤트가 발생하면 커스텀 오버레이의 위치를 변경합니다 
+  kakao.maps.event.addListener(polygon, 'mousemove', function(mouseEvent) {     
+    customOverlay.setPosition(mouseEvent.latLng); 
+  });
+
 
   // 다각형에 mouseout 이벤트를 등록하고 이벤트가 발생하면 폴리곤의 채움색을 원래색으로 변경합니다
   kakao.maps.event.addListener(polygon, 'mouseout', function()
   {
-    polygon.setOptions({
-      fillColor: '#fff'
-    });
+    polygon.setOptions({fillColor: '#fff'});
   });
 }
 
@@ -309,6 +319,15 @@ function displayMultipolygonDong(coordinates, name) {
     });
     // console.log(++mcnt);
     document.getElementById("dong").innerHTML = name;
+    customOverlay.setContent('<div class="area">' + name + '</div>');
+    customOverlay.setPosition(mouseEvent.latLng);
+    customOverlay.setMap(map);
+  });
+
+
+  // 다각형에 mousemove 이벤트를 등록하고 이벤트가 발생하면 커스텀 오버레이의 위치를 변경합니다 
+  kakao.maps.event.addListener(polygon, 'mousemove', function(mouseEvent) {     
+    customOverlay.setPosition(mouseEvent.latLng); 
   });
 
 
