@@ -20,15 +20,17 @@ function DrawSeoulMap(){
 
     var data = geojson.features;
     var coordinates = []; //좌표 저장할 배열
-    var name = ''; //행정 구 이름
+    var sig_name = ''; //행정 구 이름 SIG_KOR_NM
+    var sig_code = ''; // 행정 구 코드 SIG_CD
     var districts = []; // 구 저장하는 배열
 
     $.each(data, function(index, val) {
 
       coordinates = val.geometry.coordinates;
-      name = val.properties.SIG_KOR_NM;
-      districts.push(name);
-      displayArea(coordinates, name);
+      sig_name = val.properties.SIG_KOR_NM;
+      sig_code = val.properties.SIG_CD;
+      districts.push(sig_name);
+      displayArea(coordinates, sig_name, sig_code);
     });
   });
 }
@@ -41,7 +43,7 @@ var overlays = [];
 
 
 // 행정구역 폴리곤 그리는 함수
-function displayArea(coordinates, name){
+function displayArea(coordinates, sig_name, sig_code){
 
   var path = []; // 폴리곤 그려줄 path 배열 (각 지역구 폴리곤)
   var points = []; // 중심좌표 구하기 위한 지역구 좌표들 배열
@@ -84,8 +86,8 @@ function displayArea(coordinates, name){
       fillColor: '#e1b8e6' // blue: 09f
     });
     // console.log(++mcnt);
-    document.getElementById("gu").innerHTML = name;
-    customOverlay.setContent('<div class="area">' + name + '</div>');
+    document.getElementById("gu").innerHTML = sig_name;
+    customOverlay.setContent('<div class="area">' + sig_name + '</div>');
     customOverlay.setPosition(mouseEvent.latLng);
     customOverlay.setMap(map);
   });
@@ -122,7 +124,7 @@ function displayArea(coordinates, name){
     deleteDistrict(overlays);
 
     // 클릭한 다각형만 다시 그리는 함수 호출
-    redrawPolygon(path, name); // mouseover에 있던 name (ㅇㅇ구)
+    redrawPolygon(path, sig_name, sig_code); // mouseover에 있던 name (ㅇㅇ구)
   });
 }
 
@@ -167,7 +169,7 @@ function deleteDistrict(overlays) {
 
 
 // clicked_gu에 속한 동 다각형 그리는 코드
-function drawDong(clicked_gu){
+function drawDong(sig_name, sig_code){
   console.log("drawDong start");
   $.getJSON("seoul_dong_10percent.json", function(geojson)
   {
@@ -175,7 +177,8 @@ function drawDong(clicked_gu){
 
     var data = geojson.features;
     var d_coordinates = []; // 동 좌표 저장할 배열
-    var d_name = ''; //행정동 이름
+    var emd_name = ''; // 행정동 이름
+    var emd_code = ''; // 행정동 코드
     var dongs = []; // 동 저장하는 배열
     var count = 0;
 
@@ -183,16 +186,17 @@ function drawDong(clicked_gu){
     $.each(data, function(index, val) {
       d_coordinates = val.geometry.coordinates;
       // console.log(val.geometry.coordinates[0]);
-      d_name = val.properties.EMD_KOR_NM;
+      emd_name = val.properties.EMD_KOR_NM;
+      emd_code = val.properties.EMD_CD;
       polygon_type = val.geometry.type;
-      dongs.push(d_name);
+      dongs.push(emd_name);
 
-      // TODO: 23.01.09 강남구 신사동, 은평구 신사동 구분 방법 찾기
-      if (seoul[clicked_gu].includes(d_name)){
+      // TODO: 23.01.09 강남구 신사동, 은평구 신사동 구분 방법 찾기 => 23.05.01 완료!
+      if (sig_code == emd_code.substring(0, 5)) {
         if (polygon_type == 'MultiPolygon') {
-          displayMultipolygonDong(d_coordinates, d_name);
+          displayMultipolygonDong(d_coordinates, emd_name);
         } else {
-          displayDong(d_coordinates, d_name);
+          displayDong(d_coordinates, emd_name);
         }
       }
     });
@@ -201,7 +205,7 @@ function drawDong(clicked_gu){
 
 
 // 클릭한 다각형을 다시 그리는 함수
-function redrawPolygon(path, gu) {
+function redrawPolygon(path, sig_name, sig_code) {
   var polygon = new kakao.maps.Polygon({
     map: map, // 다각형을 표시할 지도 객체
     path: path,
@@ -214,11 +218,11 @@ function redrawPolygon(path, gu) {
   polygons_select.push(polygon);
 
 
-  console.log("c l i c k : " + gu);
+  console.log("c l i c k : " + sig_name + sig_code);
 
   // 여기에 동 다각형 그리는 코드!!
   // TODO: 특정 구를 클릭하면 그 구 안에 있는 동들만 표시되도록 하기. => 23.01.10 완료.
-  drawDong(gu);
+  drawDong(sig_name, sig_code);
 }
 
 
