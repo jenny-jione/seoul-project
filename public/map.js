@@ -278,9 +278,9 @@ function displayDong(coordinates, name) {
 
 
   // 다각형에 mouseout 이벤트를 등록하고 이벤트가 발생하면 폴리곤의 채움색을 원래색으로 변경합니다
-  kakao.maps.event.addListener(polygon, 'mouseout', function()
-  {
+  kakao.maps.event.addListener(polygon, 'mouseout', function() {
     polygon.setOptions({fillColor: '#fff'});
+    customOverlay.setMap(null);
   });
 }
 
@@ -333,9 +333,8 @@ function displayMultipolygonDong(coordinates, name) {
 
   // 다각형에 mouseout 이벤트를 등록하고 이벤트가 발생하면 폴리곤의 채움색을 원래색으로 변경합니다
   kakao.maps.event.addListener(polygon, 'mouseout', function() {
-    polygon.setOptions({
-      fillColor: '#fff'
-    });
+    polygon.setOptions({fillColor: '#fff'});
+    customOverlay.setMap(null);
   });
 }
 
